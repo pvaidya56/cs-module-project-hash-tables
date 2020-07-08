@@ -16,40 +16,41 @@ class HashTable:
     """
     A hash table that with `capacity` buckets
     that accepts string keys
-
     Implement this.
     """
 
     def __init__(self, capacity):
         # Your code here
-
+        self.hashtable = [None] * capacity
+        self.capacity = capacity
+        self.size = 0
 
     def get_num_slots(self):
         """
         Return the length of the list you're using to hold the hash
         table data. (Not the number of items stored in the hash table,
         but the number of slots in the main list.)
-
         One of the tests relies on this.
-
         Implement this.
         """
         # Your code here
+        #length of the hashtable
+        return len(self.hashtable)
 
 
     def get_load_factor(self):
         """
         Return the load factor for this hash table.
-
         Implement this.
         """
         # Your code here
+        return (self.size / self.get_num_slots())
+
 
 
     def fnv1(self, key):
         """
         FNV-1 Hash, 64-bit
-
         Implement this, and/or DJB2.
         """
 
@@ -59,10 +60,17 @@ class HashTable:
     def djb2(self, key):
         """
         DJB2 hash, 32-bit
-
         Implement this, and/or FNV-1.
         """
         # Your code here
+
+        hash = 5381
+
+        for c in key:
+            hash = (hash * 33 + ord(c)) 
+        
+        return (hash % self.capacity)
+
 
 
     def hash_index(self, key):
@@ -71,49 +79,135 @@ class HashTable:
         between within the storage capacity of the hash table.
         """
         #return self.fnv1(key) % self.capacity
-        return self.djb2(key) % self.capacity
+        return self.djb2(key) % len(self.hashtable)
 
     def put(self, key, value):
         """
         Store the value with the given key.
-
         Hash collisions should be handled with Linked List Chaining.
-
         Implement this.
         """
         # Your code here
+
+        #if empty spot in hashtable array
+        if (self.hashtable[self.djb2(key)] == None):
+            self.hashtable[self.djb2(key)] = HashTableEntry(key, value)
+            self.size += 1
+        else:
+            current = self.hashtable[self.djb2(key)] #initialize current
+
+            #loop until you find the next value to be None
+            while (current.next != None):
+                #if at any point current.key == key you are searching for, then that key == the current key
+                if (current.key == key):
+                    current.value = value
+                    return
+                current = current.next
+
+            #if current.key == key you are searching for, then replace with key
+            if (current.key == key):
+                current.value = value
+                return
+
+            #set next of the end node to the value of what you want to add
+            current.next = HashTableEntry(key, value)
+            self.size += 1
+
+            
+        
 
 
     def delete(self, key):
         """
         Remove the value stored with the given key.
-
         Print a warning if the key is not found.
-
         Implement this.
         """
         # Your code here
+        #if hashtable at that index is not None
+        if self.hashtable[self.djb2(key)]:
+            
+            #if theres only 1 item
+            if self.hashtable[self.djb2(key)].next == None:
+                self.hashtable[self.djb2(key)] = None
+                return
+            #if there are many items
+            else:
+                current = self.hashtable[self.djb2(key)] #initialize current
+                prev = None
+
+                #loop over entire linked list 
+                while (current != None):
+                    #if found node to delete
+                    if (current.key == key):
+                        #if we are at the head of the LL
+                        if (prev == None):
+                            self.hashtable[self.djb2(key)] = current.next 
+                        else:
+                            prev.next = current.next 
+                        return
+
+                    #item not found so reassign
+                    prev = current
+                    current = current.next
+                    
+
+        else:
+            print('Key not found')
+        
 
 
     def get(self, key):
         """
         Retrieve the value stored with the given key.
-
         Returns None if the key is not found.
-
         Implement this.
         """
         # Your code here
+
+        #if hashtable is !None
+        if self.hashtable[self.djb2(key)]:
+            #if hashtable has only 1 node and that 1 node is the one 
+            if (self.hashtable[self.djb2(key)].next == None and self.hashtable[self.djb2(key)].key == key):
+                return self.hashtable[self.djb2(key)].value
+
+            #if hashtable has more than 1 node
+            else:
+                current = self.hashtable[self.djb2(key)]
+
+                #loop over entire linked list until found correct node
+                while (current != None):
+                    if (current.key == key):
+                        return current.value
+
+                    #not found so reassign
+                    current = current.next
+
+        else:
+            return None
+        
 
 
     def resize(self, new_capacity):
         """
         Changes the capacity of the hash table and
         rehashes all key/value pairs.
-
         Implement this.
         """
         # Your code here
+        if (self.get_load_factor() > 0.7):
+            oldHashtable = self.hashtable
+            self.capacity = new_capacity
+            self.hashtable = [None] * new_capacity
+
+            for item in oldHashtable:
+                current = item
+
+                #loop over entire linked list
+                while (current != None):
+                    self.put(current.key, current.value) #add item
+                    current = current.next #reassign
+                
 
 
 
