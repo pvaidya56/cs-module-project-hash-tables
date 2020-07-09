@@ -1,5 +1,17 @@
+import string 
 def word_count(s):
-    # Your code here
+    s = s.lower()
+    unwanted_chars = '":;.,-+=/\|[]{}()*^&'
+    s = s.translate(str.maketrans({a:None for a in unwanted_chars})) 
+    # Python Program to Count words in a String using Dictionary
+    counts = dict()
+    newWords = s.split()
+    for s in newWords:
+        if s in counts:
+            counts[s] += 1
+        else:
+            counts[s] = 1
+    return counts
 
 
 
