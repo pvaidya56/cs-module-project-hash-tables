@@ -1,7 +1,8 @@
+from collections import OrderedDict
+
 def no_dups(s):
-    # Your code here
-
-
+    new_list = OrderedDict().fromkeys(s.split())
+    return " ".join(new_list)    
 
 if __name__ == "__main__":
     print(no_dups(""))
